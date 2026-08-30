@@ -1,0 +1,125 @@
+{
+  "project_name": "AI Teacher",
+  "theme": "dark-first",
+  "archetype": "Cinematic & Tactical Minimalism",
+  "description": "An immersive, premium edtech platform focused on an AI-driven cinematic lesson experience. Uses deep darks, high-contrast typography, and striking neon accents (Volt Yellow) to differentiate from generic purple AI slop.",
+  "colors": {
+    "light": {
+      "background": "#F4F4F5",
+      "foreground": "#09090B",
+      "card": "#FFFFFF",
+      "card_foreground": "#09090B",
+      "primary": "#E3FF37",
+      "primary_foreground": "#09090B",
+      "secondary": "#27272A",
+      "secondary_foreground": "#FAFAFA",
+      "accent": "#00E5FF",
+      "accent_foreground": "#09090B",
+      "border": "#E4E4E7",
+      "ring": "#E3FF37"
+    },
+    "dark": {
+      "background": "#09090B",
+      "foreground": "#FAFAFA",
+      "card": "#18181B",
+      "card_foreground": "#FAFAFA",
+      "primary": "#E3FF37",
+      "primary_foreground": "#09090B",
+      "secondary": "#27272A",
+      "secondary_foreground": "#FAFAFA",
+      "accent": "#00E5FF",
+      "accent_foreground": "#09090B",
+      "border": "#27272A",
+      "ring": "#E3FF37"
+    }
+  },
+  "typography": {
+    "fonts": {
+      "heading": "Cabinet Grotesk, sans-serif",
+      "body": "Satoshi, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scales": {
+      "h1": "text-5xl sm:text-6xl font-black tracking-tighter leading-none",
+      "h2": "text-3xl sm:text-4xl font-bold tracking-tight",
+      "h3": "text-xl sm:text-2xl font-bold tracking-tight",
+      "h4": "text-lg font-semibold tracking-tight",
+      "body": "text-base leading-relaxed",
+      "label": "text-xs font-bold uppercase tracking-[0.2em]"
+    },
+    "pairing_rules": "Use Cabinet Grotesk for all headings. Use Satoshi for standard body text. Use JetBrains Mono for scores, timers, code blocks, and technical labels. NEVER use Inter for headings."
+  },
+  "layouts": {
+    "lesson_player": "Cinematic Full-Screen layout. The background should be pure black (bg-black). The Avatar can be a floating PIP (Picture-in-Picture) window or occupy a 30% left column, while the right 70% displays dynamic slides (Mermaid diagrams, KaTeX equations, Recharts). Use a floating, glassmorphic playback control bar at the bottom center.",
+    "dashboard": "High-density Bento Grid layout. grid-cols-1 md:grid-cols-4 lg:grid-cols-12 with tight gaps (gap-4 or gap-6). Cards should be flat with 1px border-border, no drop shadows in dark mode.",
+    "landing_page": "Asymmetric, heavily spaced layout. Use padding scales like py-24 or py-32. Huge typography, overlapping elements, and dark cinematic hero image with bg-black/40 overlay."
+  },
+  "components": {
+    "surfaces": {
+      "glass": "backdrop-blur-xl bg-white/10 border border-white/10 shadow-lg (for Dark Mode controls/modals)",
+      "card": "bg-card border border-border rounded-xl",
+      "modal_overlay": "backdrop-blur-2xl bg-black/80 (for mid-lesson checkpoint questions)"
+    },
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:brightness-110 transition-all rounded-full px-6 py-3 font-semibold",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all rounded-full px-6 py-3 font-semibold"
+    },
+    "forms": "Use Shadcn Form components. Inputs should have bg-transparent, border-border, and focus:ring-primary.",
+    "charts": "Use Recharts wrapped in Shadcn Chart components. Use pure, distinct colors like #E3FF37 and #00E5FF for data lines against the dark background."
+  },
+  "visual_enhancers": {
+    "borders": "Use 1px subtle borders (border-white/10 or border-zinc-800) to separate grid items and cards instead of shadows.",
+    "noise": "Apply a subtle noise/grain texture overlay (opacity-5) over the background to remove digital flatness.",
+    "glow": "Use a subtle blur behind active elements or primary accents. Example: a glowing drop-shadow-[0_0_15px_rgba(227,255,55,0.3)] on the active progress bar."
+  },
+  "motion": {
+    "transitions": "Use specific properties: transition: transform 0.3s ease, opacity 0.3s ease. NEVER use transition-all. Use spring physics (framer-motion) for modal entrances and avatar speech amplitude indicators.",
+    "hover_states": "Interactive elements should scale slightly (scale-105) or change text color explicitly. Cards can lift (-translate-y-1) on hover."
+  },
+  "media": {
+    "icons": "Use @phosphor-icons/react for dense dashboard metrics and playback controls. Use lucide-react as fallback.",
+    "avatar": "The AI avatar should simulate speech by animating scale/opacity based on a mock audio amplitude value, or by switching SVG mouth states."
+  },
+  "image_urls": {
+    "landing_hero": {
+      "url": "https://images.unsplash.com/photo-1677442136019-21780ecad995?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1OTN8MHwxfHNlYXJjaHwyfHxjaW5lbWF0aWMlMjBhaSUyMGxlYXJuaW5nJTIwZWR1Y2F0aW9ufGVufDB8fHx8MTc4ODEwNjgzNnww&ixlib=rb-4.1.0&q=85",
+      "description": "3D rendered AI text on dark digital background - use as the main hero background with a dark overlay."
+    },
+    "avatar_placeholder": {
+      "url": "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzl8MHwxfHNlYXJjaHwxfHxwb3J0cmFpdCUyMHByb2Zlc3Npb25hbCUyMHRlYWNoZXIlMjBmcmllbmRseXxlbnwwfHx8fDE3ODgxMDY4MzZ8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Smiling woman presenting - use as the AI Teacher's profile avatar or fallback video feed."
+    }
+  },
+  "dependencies_to_install": [
+    "yarn add @phosphor-icons/react",
+    "yarn add framer-motion",
+    "yarn add recharts",
+    "yarn add katex",
+    "yarn add mermaid"
+  ],
+  "instructions_to_main_agent": [
+    "Prioritize Dark Mode. Implement the CSS variables in index.css as specified in the colors section.",
+    "Do not use default Shadcn Vercel look. Customize border radii to be rounded-xl or completely sharp, based on component.",
+    "For the Lesson Player, construct a cinematic layout: hiding standard navigation. The controls should float at the bottom using the glass surface classes.",
+    "In the Dashboard, use the Bento Grid approach. Avoid using too many distinct colors; let the data and the Volt Yellow primary color stand out.",
+    "Ensure all interactive elements have data-testid attributes (e.g., data-testid='play-lesson-button').",
+    "Use framer-motion to animate the AI avatar's speaking state and the mid-lesson checkpoint modal popups.",
+    "When rendering equations, use KaTeX. When rendering diagrams, use Mermaid."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "You tend to converge toward generic, 'on distribution' outputs. In frontend design, this creates the 'AI slop' aesthetic. Avoid this: make creative, distinctive frontends that surprise and delight.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy and 1px borders.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur) for floating elements.",
+    "You MUST NOT apply universal transition. Eg: transition: all. Always add transitions for specific interactive elements.",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file.",
+    "Always use modern button styles like pill-shaped, with interaction animations & color relevant to the app style.",
+    "NEVER use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, custom cursors, selection states, and loading animations separate good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories = main agent will use placeholder text which is FORBIDDEN.",
+    "Use 'sonner' for toasts."
+  ]
+}

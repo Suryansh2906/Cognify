@@ -1,0 +1,27 @@
+{
+  "summary": "Focused frontend regression retest of the six iteration_1 fixes plus the authenticated core loop on https://ai-teacher-38.preview.emergentagent.com. ALL SIX FIXES VERIFIED PASS. (1) /demo: clicking next-button on SLIDE 1/4 now opens checkpoint-modal instead of skipping; all 4 seed segments gated the same way; MCQ answer -> evaluation-result. Confirmed the same gating on an authenticated real lesson (checkpoint opened on next-button click). (2) End-of-lesson auto-route: demo reached demo-complete with score (2/4 = 50%) with no Finish press; real lesson auto-routed from last segment to /assessment/sess_6b9eba6ea5b4 without pressing Finish. (3) Zero console errors on demo and real player - no '<ellipse> attribute ry' errors at all (only a pre-existing unauth 401 for /api/auth/me on the public /demo). (4) Mermaid: seed 'What is a Force?' img 131px tall inside 165px card; all 3 generated-lesson diagrams clamped to exactly ~300px and fully contained in [data-testid=mermaid-diagram]; nodes readable on dark theme after style sanitization. (5) report-next-button label 'Learn Basic Kinematics' (no mid-word cut; slice+ellipsis logic present for >22 chars) and clicking it navigates to /new with topic-input prefilled 'Basic Kinematics'. (6) /admin: gemini/groq/openrouter show '(No Key)' + neutral 'not configured' disabled toggles; emergent shows 'healthy' and toggles to 'forced fail' and back (simulate-failure reset verified via /api/admin/llm-status simulated_fail=false). REGRESSION core loop OK: /new topic Newton's Laws + time-5 -> LLM plan (~40s) -> player (3 segments) -> wrong short-answer produced 'Not quite' + misconception-note + adaptation-block (analogy) + follow-up question -> auto-route to assessment (4 LLM questions) -> submit -> report-view with report-score 0% (deliberately wrong answers), strong/weak areas and recommendation.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Real lesson player (Newton's Laws slide 2/3)", "issues": ["Narration/caption bridges to an unrelated prior topic ('While the photosynthesis reaction needs specific inputs like CO2 and light...') on a physics lesson - profile-driven analogy reads as off-topic; content-quality nit only, not a defect"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "LessonPlayer.goToNext correctly gates unanswered checkpoints and calls onComplete on the last segment - fix is sound; note the narrationDone effect and goToNext both route to onComplete, so onComplete must stay idempotent (Player/DemoPlayer currently guard via state, keep it that way).",
+    "Avatar.js keyframe times normalized to [0,0.94,0.97,1] - ry error gone.",
+    "Mermaid.js sanitize() strips style/classDef/class/linkStyle lines and clamps the data-URI <img> to max-h-[300px] object-contain - overflow resolved.",
+    "Backend nit carried over from iteration_1 (not retested): POST /api/admin/simulate-failure has replace-only semantics and silently ignores a `fail` field."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "not tested this iteration (frontend-only request)", "frontend": "100% (6/6 fixes verified, core loop regression pass)"},
+  "seed_data_creation": "Generated lesson plan_410bde41665e (Newton's Laws, 3 segments) and assessment session sess_6b9eba6ea5b4 with a graded report (0%) under user test-user-1.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": false,
+  "test_credentials": "cookie session_token=test_session_main (user_id test-user-1) - valid, worked for /admin, /new, /player, /assessment",
+  "context_for_next_testing_agent": "All 6 iteration_1 fixes verified fixed. Reusable artifacts: player URL /player/plan_410bde41665e (slide 1 has no checkpoint, slide 2 does) and report at /assessment/sess_6b9eba6ea5b4. Tips: set cookie via context.add_cookies before goto; wait_until='domcontentloaded'; clicking next-button now OPENS the checkpoint (no longer skips), so drive the lesson with next-button + answer loop; short-answer testid 'answer-input'; assessment options 'q{ID}-opt{N}'. Not re-tested this round (unchanged from iteration_1): upload/RAG, /paths, EN<->HI switch (pills/mermaid labels stay English - still open low-priority), 503 fallback, mobile caption-bar overlay design nit.",
+  "rca_of_the_issue": "N/A - all reported defects from iteration_1 confirmed resolved; no new failures reproduced."
+}

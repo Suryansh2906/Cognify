@@ -1,0 +1,54 @@
+{
+  "summary": "Frontend end-to-end testing of AI Teacher on the public preview URL. Verified: landing (/) + docs (/docs), public demo player (/demo) with avatar, Mermaid data-URI <img>, KaTeX, pills, visual-reason, captions and all 5 playback controls; watchdog auto-progression through all 4 seed segments with 4 checkpoint modals (MCQ/short-answer/problem/application), evaluation + misconception note + demo-complete score (3/4 = 75%). Auth via pre-seeded cookie session (test_session_main) -> /dashboard renders without redirect, unauth /dashboard correctly bounces to landing. /new: Hinglish NL parse populated topic=Photosynthesis, level=beginner, language=hi; real LLM lesson generation (~40s) navigated to the player with subject-aware biology/physics visuals; a deliberately wrong answer produced misconception-note + adaptation-block (new analogy) + follow-up question. Language switch EN->HI re-translated segment text in ~10s and back to EN. Finish -> /assessment/:sessionId rendered 3 LLM questions, submit produced report-view with report-score 33%, strong/weak areas and recommendation; /dashboard then reflected score history chart, concept mastery bars, 1 topic / recent report. Upload/RAG: .txt indexed, chip listed on remount, generating with it selected produced grounded=True plan (source_material_id set, source_ref '[section 1]'). /paths created 'Basic Electricity' 7-step ordered path and advance-step-button progressed a step. /admin showed active-provider emergent, 4-row fallback chain, toggle-fail-emergent + test-call logged 'RuntimeError: simulated_failure' in call-log. LLM total-failure: all 4 providers simulated -> /api/lessons/parse-request and /api/lessons/plan return HTTP 503 with clear message; UI surfaced a sonner toast 'AI service temporarily unavailable, please retry' and /demo kept working with zero LLM. Simulation toggles were reset afterwards (verified simulated_fail=false). Added a light backend regression suite (8/8 passing).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/admin/simulate-failure", "issue": "Replace-semantics only (SimReq has just `providers`); unknown body fields are silently ignored, so a caller sending {\"providers\":[...],\"fail\":false} actually ENABLES failure for those providers. Consider supporting an explicit `fail` flag or rejecting unknown fields."},
+      {"endpoint": "POST /api/lessons/plan", "issue": "5-minute budget produced 2 segments in the UI runs (agent note/backend claim was 3 segments for 5 min) - segment-count scaling is inconsistent, worth re-checking the prompt/clamp."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Avatar.js (lines 32-35)", "issue": "Recurring console error on every player screen: '<ellipse> attribute ry: Expected length, \"undefined\"'. framer-motion keyframes animate={{ry:[12,2,12]}} with times=[0,0.04,0.08] is invalid (times must end at 1), so ry resolves to undefined.", "selector": "[data-testid=\"ai-avatar\"] svg ellipse", "priority": "MEDIUM"},
+      {"component": "SlideVisual/Mermaid", "issue": "Some LLM-generated Mermaid diagrams render at intrinsic size and overflow the slide card / viewport (e.g. Photosynthesis slide 2/2 'Plant Leaf' box is clipped at the bottom). No max-height / object-fit scaling on the data-URI <img>.", "selector": "[data-testid=\"mermaid-diagram\"] img", "priority": "MEDIUM"},
+      {"component": "Mermaid theme", "issue": "LLM-supplied node styles produce bright blue/magenta nodes with white text on the dark theme (Ohm's Law slide: 'Resistor/Load' white-on-pink is nearly unreadable and clashes with the volt-yellow palette). Consider forcing a dark mermaid theme / stripping LLM style directives.", "selector": "[data-testid=\"mermaid-diagram\"]", "priority": "MEDIUM"},
+      {"component": "Assessment report next button", "issue": "Label uses report.next_topic.slice(0,22) with no ellipsis -> renders mid-sentence 'Learn The Role of Light and'. Also navigates to /new without prefilling the recommended topic, so the recommendation is lost.", "selector": "[data-testid=\"report-next-button\"]", "priority": "LOW"},
+      {"component": "AdminDebug provider rows", "issue": "Providers that are 'not configured' (Gemini/Groq/OpenRouter - No Key) still display a green 'healthy' badge, which is misleading; they should read 'not configured'/neutral.", "selector": "[data-testid^=\"provider-row-\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [
+      {"flow": "Demo/real lesson checkpoints", "issue": "Clicking next-button skips a segment's checkpoint entirely - the modal never opens and the segment is simply not scored (a run where I clicked next scored 0/1 instead of 4 checkpoints). A learner can skip every question and still reach the completion/score screen.", "affected_selectors": ["[data-testid=\"next-button\"]", "[data-testid=\"checkpoint-modal\"]"]},
+      {"flow": "End of lesson", "issue": "After the last segment's narration finishes the player just pauses with no end-of-lesson cue and does not route to the assessment; the user must know to press 'Finish'. Consider auto-prompting after the final segment.", "affected_selectors": ["[data-testid=\"finish-lesson-button\"]"]},
+      {"flow": "Hindi language switch", "issue": "Caption/narration translate correctly, but on-screen pills are only partially translated (e.g. 'Sunlight + Water + CO2 = भोजन') and Mermaid node labels stay English - mixed-language slide.", "affected_selectors": ["[data-testid=\"lang-hi\"]", "[data-testid=\"slide-visual\"]"]}
+    ],
+    "design_issues": [
+      {"screen": "Mobile demo player (390x844)", "issues": ["No horizontal overflow (good), but the fixed caption bar overlays the 'Why this visual' pill / slide content, hiding part of the slide on small screens"]},
+      {"screen": "Landing", "issues": ["No contrast problem after animations settle (hero #fafafa on #09090b); the initial grey appearance is only the fade-in animation frame"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Fix Avatar framer-motion keyframe times (must end at 1) to stop the recurring SVG 'ry undefined' console error",
+    "Constrain Mermaid diagram rendering (max-height / width scaling) so tall LLM diagrams don't overflow the slide card",
+    "Force a dark-theme mermaid config or sanitize LLM style/fill directives for readable node labels",
+    "Decide checkpoint policy: block/flag next-button when a segment has an unanswered checkpoint so questions cannot be skipped silently",
+    "Add an end-of-lesson cue / auto-route to the assessment after the last segment",
+    "Polish report next-topic button (ellipsis + prefill topic on /new via router state)",
+    "Show 'not configured' instead of green 'healthy' for keyless providers in /admin",
+    "Optional: translate on-screen pills/visual labels on language switch; support an explicit `fail` flag on /api/admin/simulate-failure"
+  ],
+  "critical_code_review_comments": [
+    "Avatar.js:32-35 - framer-motion `times` array must be normalized 0..1 and end at 1; current [0,0.04,0.08] yields ry=undefined (SVG attribute error every render).",
+    "LessonPlayer goTo/next path does not gate on an unanswered checkpoint, so checkpoint scoring can be bypassed and the completion score becomes misleading.",
+    "Assessment.js:65 - next_topic.slice(0,22) truncates mid-word and the resulting nav('/new') drops the recommendation (no router state / query param).",
+    "server.py:410 simulate_failure replaces the whole SIMULATE_FAIL set and ignores extra body fields - easy for callers to invert the intent; consider `providers` + `fail: bool`.",
+    "Mermaid.js renders the SVG as a data-URI <img> with no max-height constraint; a tall LLM diagram overflows the slide container."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (8/8 support endpoints + 503 fallback)", "frontend": "~90% (all core flows pass; 5 UI/UX defects, no blockers)"},
+  "seed_data_creation": "Used pre-seeded user test-user-1/test_session_main. Created during testing: lesson plans plan_dc133c6b55b6 (Photosynthesis), plan_6b3af412e77b, an Ohm's Law grounded plan; session sess_23de58a07c5b with 1 assessment report (33%); learning path 'Basic Electricity'; uploaded material mat_ee466125dbde (test_material.txt / Ohm's Law notes, /tmp/test_material.txt).",
+  "should_call_test_agent_after_fix": true,
+  "should_main_agent_self_test": false,
+  "test_credentials": "cookie/Bearer session_token=test_session_main (user_id test-user-1) from /app/memory/test_credentials.md - valid and working",
+  "context_for_next_testing_agent": "All happy paths verified end-to-end on 2026-07 run: /demo watchdog loop (4 checkpoints, 75% score), auth cookie gating, /new NL parse + LLM generation, misconception+adaptation, EN<->HI switch, assessment+report+dashboard, RAG grounded lesson, /paths create+advance, /admin toggles, 503 graceful. Use state='attached' for the hidden [data-testid=file-input]; short-answer testid is 'answer-input' (not short-answer-input); assessment option ids are q{ID}-opt{N}; do NOT click next-button while waiting for checkpoints (it skips them); always page.goto with wait_until='domcontentloaded'. Always reset /api/admin/simulate-failure with {\"providers\":[]} (a `fail:false` field is ignored). Backend regression suite: pytest /app/backend/tests/backend_test.py.",
+  "rca_of_the_issue": "Avatar SVG error: framer-motion requires the `times` array to span 0..1 and end at 1; with times=[0,0.04,0.08] the interpolation returns undefined for the final ry keyframe, which React writes to the SVG attribute -> 'Expected length, undefined'. Checkpoint skip: LessonPlayer's manual navigation (goTo/next) advances the segment index without checking whether the current segment's checkpoint has been answered, so the modal (which is triggered on narration end) is never mounted for skipped segments and the score denominator only counts answered checkpoints. Mermaid overflow: the rendered SVG is embedded as a data-URI <img> at intrinsic size with no max-height, so tall graphs exceed the slide card."
+}
