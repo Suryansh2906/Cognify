@@ -103,6 +103,17 @@ async def auth_session(body: SessionExchange, response: Response):
     profile = await db.learner_profiles.find_one({"user_id": user_id}, {"_id": 0})
     return {"user": user, "profile": profile, "session_token": token}
 
+@api.post("/auth/guest")
+async def auth_guest(response: Response):
+    user_id = await auth.create_guest_user()
+    token = f"tok_{uuid.uuid4().hex}"
+    await auth.create_session(user_id, token)
+    response.set_cookie("session_token", token, httponly=True, secure=True,
+                        samesite="none", path="/", max_age=7 * 24 * 3600)
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
+    profile = await db.learner_profiles.find_one({"user_id": user_id}, {"_id": 0})
+    return {"user": user, "profile": profile, "session_token": token}
+
 
 @api.get("/auth/me")
 async def auth_me(user=Depends(auth.get_current_user)):
