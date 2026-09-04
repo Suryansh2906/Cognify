@@ -24,11 +24,16 @@ export default function AuthCallback() {
     (async () => {
       try {
         const res = await api.post('/auth/session', { session_id: sid });
+        // Store the token ourselves — don't rely on the browser accepting the
+        // cross-origin Set-Cookie header, since Incognito/strict browsers
+        // silently drop third-party cookies.
+        if (res.data.session_token) {
+          localStorage.setItem('session_token', res.data.session_token);
+        }
         window.history.replaceState({}, '', '/dashboard');
         const onboarded = res.data.profile?.onboarded;
         nav(onboarded ? '/dashboard' : '/onboarding', { state: { user: res.data.user } });
       } catch (e) {
-        // Log everything we can about the failure instead of silently bouncing.
         console.error('[auth] session exchange failed:', {
           message: e.message,
           status: e.response?.status,
