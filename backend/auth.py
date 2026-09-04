@@ -70,3 +70,17 @@ async def get_current_user(session_token: str = Cookie(default=None),
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
     return user
+
+async def create_guest_user():
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    await db.users.insert_one({
+        "user_id": user_id, "email": None, "name": "Guest",
+        "picture": None, "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    await db.learner_profiles.insert_one({
+        "user_id": user_id, "default_level": "beginner", "preferred_languages": ["en"],
+        "preferred_style": "clear and friendly", "onboarded": False,
+        "topics_studied": [], "strong_concepts": [], "weak_concepts": [],
+        "score_history": [], "current_learning_path_id": None,
+    })
+    return user_id
