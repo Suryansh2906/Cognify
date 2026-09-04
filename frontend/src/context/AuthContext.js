@@ -38,6 +38,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try { await api.post('/auth/logout'); } catch (e) { /* ignore */ }
+    localStorage.removeItem('session_token');
     setUser(null);
     setProfile(null);
     window.location.href = '/';
