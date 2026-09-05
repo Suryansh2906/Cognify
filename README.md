@@ -7,7 +7,7 @@ Built for the AI Innovation Hackathon 2026 (Bharat Academix).
 ## 🚀 Live Demo
 
 **Live Application:**  
-[Add your Vercel frontend URL here]
+https://cognify-sand.vercel.app/
 
 **Backend API:**  
 https://cognify-nb0o.onrender.com
