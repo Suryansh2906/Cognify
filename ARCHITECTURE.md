@@ -36,7 +36,6 @@ provider-abstraction layer that automatically fails over in this order, retrying
 per provider before moving on:
 1. Google Gemini — primary
 2. Groq — fallback
-3. OpenRouter (free-tier model) — fallback
 
 The active/last-used provider and full call history are visible at `/admin` for
 verification, and a provider can be manually forced to fail there to demonstrate the
@@ -68,8 +67,6 @@ Backend (`backend/.env`, never committed — see `.gitignore`):
 ```
 GEMINI_API_KEY=
 GROQ_API_KEY=
-OPENROUTER_API_KEY=
-ELEVENLABS_API_KEY=      # optional, showcase-lesson only
 MONGO_URL=
 ```
 Frontend (`frontend/.env`):
